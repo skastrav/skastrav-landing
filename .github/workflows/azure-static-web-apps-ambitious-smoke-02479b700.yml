@@ -19,12 +19,22 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Generate OIDC Token
+        id: generate_token
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const core = require('@actions/core')
+            const token = await core.getIDToken()
+            core.setOutput('token', token)
+
       - name: Build And Deploy
         uses: Azure/static-web-apps-deploy@v1
         with:
           action: "upload"
           app_location: "/"
           output_location: "/"
+          github_id_token: ${{ steps.generate_token.outputs.token }}
           skip_deploy_on_missing_secrets: true
 
   close_pull_request_job:
